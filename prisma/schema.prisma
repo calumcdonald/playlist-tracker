@@ -1,0 +1,17 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Video {
+  id              String   @id @default(cuid())
+  youtubeId       String   @unique
+  title           String
+  thumbnailUrl    String?
+  status          String   @default("AVAILABLE") // AVAILABLE or UNAVAILABLE
+  firstDetectedAt DateTime @default(now())
+  lastSeenAt      DateTime @default(now())
+}
