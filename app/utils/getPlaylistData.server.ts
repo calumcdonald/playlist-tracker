@@ -1,11 +1,13 @@
-type PlaylistData = {
+type PlaylistVideoData = {
   id: string;
   title: string;
   thumbnail: string;
   publishedAt: string;
 };
 
-const getPlaylistData = async (pageToken?: string): Promise<PlaylistData[]> => {
+const getPlaylistData = async (
+  pageToken?: string,
+): Promise<PlaylistVideoData[]> => {
   const playlistId = process.env.PLAYLIST_ID!;
   const apiKey = process.env.YOUTUBE_API_KEY!;
 
@@ -26,11 +28,16 @@ const getPlaylistData = async (pageToken?: string): Promise<PlaylistData[]> => {
   if (!res.ok) {
     const errorDetails = await res.json();
     console.error("YouTube API Error:", JSON.stringify(errorDetails, null, 2));
-    throw new Error(`API Error: ${res.status}`);
+    throw new Error(`YouTube API Error: ${res.status}`);
   }
 
   const data = await res.json();
-  const items = data.items || [];
+  const items = (data.items || []).map((item: any) => ({
+    id: item.id,
+    title: item.snippet.title,
+    thumbnail: item.snippet.thumbnails.standard?.url,
+    publishedAt: item.contentDetails.videoPublishedAt,
+  }));
 
   if (data.nextPageToken) {
     const nextItems = await getPlaylistData(data.nextPageToken);

@@ -1,26 +1,37 @@
-import { useLoaderData } from "@remix-run/react";
-import { json } from "@remix-run/node";
-import getPlaylistData from "../utils/getPlaylistData";
+import { useFetcher, useLoaderData } from "@remix-run/react";
+import getVideos from "~/utils/getVideos.server";
+import syncPlaylist from "~/utils/syncPlaylist.server";
+
+export async function action() {
+  await syncPlaylist();
+
+  return { success: true };
+}
 
 export async function loader() {
-  const videos = await getPlaylistData();
+  const videos = await getVideos();
 
-  return json(
-    { videos },
-    {
-      headers: {
-        "Cache-Control": "public, max-age=300, s-maxage=3600",
-      },
-    },
-  );
+  return { videos };
 }
 
 const Playlist = () => {
   const data = useLoaderData<typeof loader>();
+  const fetcher = useFetcher();
 
-  console.log(data.videos);
+  return (
+    <div>
+      <button onClick={() => fetcher.submit({}, { method: "POST" })}>
+        Refresh
+      </button>
 
-  return <p>Hello</p>;
+      {data.videos.map((video) => (
+        <div>
+          <p key={video.id}>{video.title}</p>
+          {video.thumbnailUrl ? <img src={video.thumbnailUrl} /> : <></>}
+        </div>
+      ))}
+    </div>
+  );
 };
 
 export default Playlist;
