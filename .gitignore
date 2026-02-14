@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Remix build artifacts
+.cache/
+build/
+public/build/
+
+# Environment variables and secrets (NEVER commit these)
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories
+.vscode/
+.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# TypeScript
+tsconfig.tsbuildinfo
