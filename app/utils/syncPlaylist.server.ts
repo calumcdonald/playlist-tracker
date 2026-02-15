@@ -7,9 +7,13 @@ const syncPlaylist = async () => {
   const currentVideos = await getPlaylistData();
   const now = new Date();
 
-  const videoFilenames = fs.readdirSync(
-    `${import.meta.dirname}../../public/videos/`,
-  );
+  const videosPath = `${import.meta.dirname}../../public/videos/`;
+
+  if (!fs.existsSync(videosPath)) {
+    fs.mkdirSync(videosPath, { recursive: true });
+  }
+
+  const videoFilenames = fs.readdirSync(videosPath);
 
   // 1. Update/Insert current videos
   for (const v of currentVideos) {
@@ -28,12 +32,14 @@ const syncPlaylist = async () => {
     const filename = `${v.videoId}.webm`;
 
     if (!videoFilenames.includes(filename)) {
-      await new Promise((res) => {
-        const cmd = exec(
-          `yt-dlp -f "bv+ba/b" -o "C:\Users\Calum\Documents\vscode_projects\playlist-backup\public\videos\%(id)s.%(ext)s" https://youtube.com/watch?v=${v.videoId}`,
-        );
-        cmd.on("exit", res);
-      });
+      console.time(`${v.title} (${v.videoId}) download`);
+      await new Promise((res, rej) =>
+        exec(
+          `yt-dlp -f "bv+ba/b" -o "${videosPath}%(id)s.%(ext)s" https://youtube.com/watch?v=${v.videoId}`,
+          (err) => (err ? rej(err) : res(true)),
+        ),
+      );
+      console.timeEnd(`${v.title} (${v.videoId}) download`);
     }
   }
 
