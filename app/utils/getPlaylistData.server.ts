@@ -1,5 +1,6 @@
 type PlaylistVideoData = {
   id: string;
+  videoId: string;
   title: string;
   thumbnail: string;
   publishedAt: string;
@@ -34,6 +35,7 @@ const getPlaylistData = async (
   const data = await res.json();
   const items = (data.items || []).map((item: any) => ({
     id: item.id,
+    videoId: item.contentDetails.videoId,
     title: item.snippet.title,
     thumbnail: item.snippet.thumbnails.standard?.url,
     publishedAt: item.contentDetails.videoPublishedAt,
