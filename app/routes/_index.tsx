@@ -2,7 +2,6 @@ import { useFetcher, useLoaderData } from "@remix-run/react";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { prisma } from "~/utils/db.server";
-import deleteVideo from "~/utils/deleteVideo.server";
 import getVideos from "~/utils/getVideos.server";
 import syncPlaylist from "~/utils/syncPlaylist.server";
 
