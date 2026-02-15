@@ -1,0 +1,27 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #301934;
+}
+
+.playlist-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.video-card {
+  width: 10%;
+}
+
+.video-info {
+  height: 50px;
+}
+
+.video-thumb {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  object-fit: none;
+  border-radius: 50%;
+}
