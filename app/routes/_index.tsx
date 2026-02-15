@@ -6,9 +6,11 @@ import deleteVideo from "~/utils/deleteVideo.server";
 import getVideos from "~/utils/getVideos.server";
 import syncPlaylist from "~/utils/syncPlaylist.server";
 
-type Filter = "all" | "downloaded" | "available" | "unavailable";
+type Filter = "all" | "available" | "unavailable";
 
 export async function action() {
+  await syncPlaylist();
+
   const metadataKey = "last_refresh";
   const now = new Date().toISOString();
 
@@ -18,17 +20,16 @@ export async function action() {
     update: { value: now },
   });
 
-  await syncPlaylist();
-
   return { success: true };
 }
 
 export async function loader() {
-  const videos = await getVideos();
-
-  const lastResync = await prisma.metadata.findUnique({
-    where: { type: "last_refresh" },
-  });
+  const [videos, lastResync] = await Promise.all([
+    getVideos(),
+    prisma.metadata.findUnique({
+      where: { type: "last_refresh" },
+    }),
+  ]);
 
   return {
     videos,
@@ -41,16 +42,13 @@ const Playlist = () => {
   const fetcher = useFetcher();
 
   const [filter, setFilter] = useState<Filter>("all");
+  const [showNames, setShowNames] = useState<boolean>(false);
   const [lastResync, setLastResync] = useState(data.lastResync);
 
   const filters: { label: string; type: Filter }[] = [
     {
       label: `${data.videos.length} total`,
       type: "all",
-    },
-    {
-      label: `${data.videos.filter((v) => v.filename).length} downloaded`,
-      type: "downloaded",
     },
     {
       label: `${
@@ -79,8 +77,6 @@ const Playlist = () => {
       return videos.filter((video) => video.status === "AVAILABLE");
     if (filter === "unavailable")
       return videos.filter((video) => video.status === "UNAVAILABLE");
-    if (filter === "downloaded")
-      return videos.filter((video) => video.filename);
 
     return videos;
   };
@@ -98,14 +94,18 @@ const Playlist = () => {
         </button>
         {filters.map((filterItem) => (
           <div
-            className={`filter ${
-              filter === filterItem.type ? "selected" : undefined
-            }`}
+            className={`filter${filter === filterItem.type ? " selected" : ""}`}
             onClick={() => handleFilterClick(filterItem.type)}
           >
             {filterItem.label}
           </div>
         ))}
+        <div
+          className={`filter${showNames ? " selected" : ""}`}
+          onClick={() => setShowNames((prev) => !prev)}
+        >
+          show names
+        </div>
       </div>
 
       <div className="playlist-container">
@@ -115,13 +115,17 @@ const Playlist = () => {
               href={video.filename ? `/videos/${video.filename}` : undefined}
               target="_blank"
             >
-              {/* <div className="video-info">
-              <span className="video-title" key={video.id}>
-                {video.title}
-              </span>
-              <br />
-              <span className="video-status">{video.status}</span>
-            </div> */}
+              {showNames ? (
+                <div className="video-info">
+                  <span className="video-title" key={video.id}>
+                    {video.title.length > 57
+                      ? `${video.title.slice(0, 57)}...`
+                      : video.title}
+                  </span>
+                </div>
+              ) : (
+                <></>
+              )}
               <img
                 className={`video-thumb${
                   !video.filename ? " unavailable" : ""

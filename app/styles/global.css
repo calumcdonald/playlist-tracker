@@ -18,8 +18,19 @@ body {
   position: relative;
 }
 
+.video-card a {
+  text-decoration: none;
+  text-align: center;
+}
+
 .video-info {
   height: 50px;
+}
+
+.video-title {
+  color: #64a25d;
+  font-size: 12px;
+  vertical-align: bottom;
 }
 
 .video-thumb {
@@ -51,11 +62,13 @@ body {
   gap: 10px;
 }
 
+.filter {
+  cursor: pointer;
+  user-select: none;
+}
+
+/* utility */
 .selected {
   font-weight: bold;
   text-decoration: underline;
-}
-
-.filter {
-  cursor: pointer;
 }
