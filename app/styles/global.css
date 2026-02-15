@@ -25,3 +25,11 @@ body {
   object-fit: none;
   border-radius: 50%;
 }
+
+.placeholder {
+  object-fit: contain;
+}
+
+.unavailable {
+  filter: grayscale();
+}

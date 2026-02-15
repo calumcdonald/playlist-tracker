@@ -1,5 +1,6 @@
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import dayjs from "dayjs";
+import { useState } from "react";
 import { prisma } from "~/utils/db.server";
 import getVideos from "~/utils/getVideos.server";
 import syncPlaylist from "~/utils/syncPlaylist.server";
@@ -36,23 +37,30 @@ const Playlist = () => {
   const data = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
 
-  const minuteDifference = Math.round(
-    dayjs().diff(data.lastResync) / 1000 / 60,
-  );
+  const [lastResync, setLastResync] = useState(data.lastResync);
+
+  const minuteDifference = Math.round(dayjs().diff(lastResync) / 1000 / 60);
+
+  const handleResyncClick = () => {
+    setLastResync(new Date().toISOString());
+
+    fetcher.submit({}, { method: "POST" });
+  };
 
   return (
     <div>
-      <button onClick={() => fetcher.submit({}, { method: "POST" })}>
+      <button onClick={handleResyncClick}>
         Re-Sync{" "}
-        {data.lastResync &&
-          minuteDifference > 1 &&
-          `(${minuteDifference}m ago)`}
+        {lastResync && minuteDifference > 1 && `(${minuteDifference}m ago)`}
       </button>
 
       <div className="playlist-container">
         {data.videos.map((video) => (
           <div className="video-card">
-            <a href={`/videos/${video.videoId}.webm`} target="_blank">
+            <a
+              href={video.filename ? `/videos/${video.filename}` : undefined}
+              target="_blank"
+            >
               {/* <div className="video-info">
               <span className="video-title" key={video.id}>
                 {video.title}
@@ -60,11 +68,14 @@ const Playlist = () => {
               <br />
               <span className="video-status">{video.status}</span>
             </div> */}
-              {video.thumbnailUrl ? (
-                <img className="video-thumb" src={video.thumbnailUrl} />
-              ) : (
-                <></>
-              )}
+              <img
+                className={`video-thumb${
+                  video.status === "UNAVAILABLE" || !video.filename
+                    ? " unavailable"
+                    : ""
+                }${!video.thumbnailUrl ? " placeholder" : ""}`}
+                src={video.thumbnailUrl ?? "/placeholder.webp"}
+              />
             </a>
           </div>
         ))}
