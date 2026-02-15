@@ -15,6 +15,7 @@ model Video {
   status          String   @default("AVAILABLE") // AVAILABLE or UNAVAILABLE
   firstDetectedAt DateTime @default(now())
   lastSeenAt      DateTime @default(now())
+  filename        String?
 }
 
 model Metadata {
