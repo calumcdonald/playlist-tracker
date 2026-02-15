@@ -1,4 +1,4 @@
-type PlaylistVideoData = {
+export type PlaylistVideoData = {
   id: string;
   videoId: string;
   title: string;
@@ -37,7 +37,9 @@ const getPlaylistData = async (
     id: item.id,
     videoId: item.contentDetails.videoId,
     title: item.snippet.title,
-    thumbnail: item.snippet.thumbnails.standard?.url,
+    thumbnail:
+      item.snippet.thumbnails.standard?.url ??
+      item.snippet.thumbnails.default?.url,
     publishedAt: item.contentDetails.videoPublishedAt,
   }));
 
