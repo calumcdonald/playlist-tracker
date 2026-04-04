@@ -13,15 +13,26 @@ const downloadVideo = async ({
   console.time(`${v.title} (${v.videoId}) download`);
   await new Promise<string>((res, rej) =>
     exec(
-      `yt-dlp -f "bv+ba/b" -o "${videosPath}%(id)s.%(ext)s" https://youtube.com/watch?v=${v.videoId}`,
+      `yt-dlp -f "bv+ba/b" --js-runtimes node --cookies-from-browser firefox -o "${videosPath}/%(id)s.%(ext)s" https://youtube.com/watch?v=${v.videoId}`,
       (err, data) => {
         if (err) return rej(err);
 
         const lineStrings = data.split("\n");
-        const destinationString = lineStrings.find((str) =>
-          str.includes("Destination:"),
+
+        const destinationString = lineStrings
+          .filter((str) => str.includes("Destination:"))
+          .reverse()[0];
+
+        let outputPath = (destinationString ?? "").split("Destination: ")[1];
+
+        const mergerSplit = "[Merger] Merging formats into ";
+        const mergerLine = lineStrings.find((line) =>
+          line.startsWith(mergerSplit),
         );
-        const outputPath = (destinationString ?? "").split("Destination: ")[1];
+
+        if (mergerLine) {
+          outputPath = mergerLine.split(mergerSplit)[1].slice(0, -1);
+        }
 
         const filename = path.basename(outputPath);
 
@@ -30,6 +41,7 @@ const downloadVideo = async ({
     ),
   )
     .then(async (filename) => {
+      console.log(`Downloaded '${v.title}' to filename '${filename}'`);
       await prisma.video.update({
         where: { youtubeId: v.id },
         data: { status: "AVAILABLE", filename },

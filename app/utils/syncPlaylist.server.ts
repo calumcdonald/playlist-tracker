@@ -2,19 +2,19 @@ import getPlaylistData from "./getPlaylistData.server";
 import { prisma } from "~/utils/db.server";
 import fs from "fs";
 import downloadVideo from "./downloadVideo.server";
+import path from "path";
 
 const syncPlaylist = async () => {
   const currentVideos = await getPlaylistData();
   const now = new Date();
 
-  const videosPath = `${import.meta.dirname}../../public/videos/`;
+  const videosPath = path.resolve(import.meta.dirname, `../public/videos/`);
 
   if (!fs.existsSync(videosPath)) {
     fs.mkdirSync(videosPath, { recursive: true });
   }
 
   const videoFilenames = fs.readdirSync(videosPath);
-  const trimmedNames = videoFilenames.map((filename) => filename.split(".")[0]);
 
   // 1. Update/Insert current videos
   for (const v of currentVideos) {
@@ -22,6 +22,7 @@ const syncPlaylist = async () => {
       where: { youtubeId: v.id },
       update: {
         lastSeenAt: now,
+        status: "AVAILABLE",
       },
       create: {
         youtubeId: v.id,
@@ -32,9 +33,12 @@ const syncPlaylist = async () => {
       },
     });
 
-    const filename = v.videoId;
+    const videoIdString = v.videoId;
 
-    if (!trimmedNames.includes(filename)) {
+    if (!videoFilenames.find((filename) => filename.includes(videoIdString))) {
+      console.log(
+        `'${v.title} - ${videoIdString}' not found in '${videosPath}', downloading`,
+      );
       await downloadVideo({ v, videosPath });
     }
   }
