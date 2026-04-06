@@ -91,6 +91,11 @@ const Playlist = () => {
           Re-Sync{" "}
           {lastResync && minuteDifference > 1 && `(${minuteDifference}m ago)`}
         </button>
+        <div>
+          <a target="_blank" href="/shuffle">
+            shuffle
+          </a>
+        </div>
         {filters.map((filterItem) => (
           <div
             className={`filter${filter === filterItem.type ? " selected" : ""}`}

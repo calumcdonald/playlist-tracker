@@ -6,6 +6,11 @@ body {
   font-family: "Roboto", sans-serif;
 }
 
+a {
+  text-decoration: none;
+  color: #64a25d;
+}
+
 .playlist-container {
   display: flex;
   flex-direction: row;
@@ -67,8 +72,24 @@ body {
   user-select: none;
 }
 
+.shuffle-video {
+  height: 100vh;
+  width: 100vw;
+  object-fit: cover;
+  background-color: black;
+  overflow: hidden;
+}
+
 /* utility */
 .selected {
   font-weight: bold;
   text-decoration: underline;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.hidden {
+  display: none;
 }

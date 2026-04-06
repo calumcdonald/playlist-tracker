@@ -1,4 +1,4 @@
-import { Links, Meta, Outlet, Scripts } from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts, useLocation } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 import styles from "./styles/global.css?url";
 
@@ -17,6 +17,8 @@ export const links: LinksFunction = () => [
 ];
 
 export default function App() {
+  const path = useLocation().pathname;
+
   return (
     <html>
       <head>
@@ -25,7 +27,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className={path.includes("shuffle") ? "overflow-hidden" : ""}>
         <Outlet />
 
         <Scripts />
