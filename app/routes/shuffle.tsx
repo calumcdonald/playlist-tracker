@@ -28,12 +28,14 @@ export const action: ActionFunction = async ({ request }) => {
 
 const Shuffle = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const videoTitleRef = useRef<HTMLDivElement | null>(null);
 
   const data = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
 
   const [video, setVideo] = useState(data.randomVideo);
   const [history, setHistory] = useState<string[]>([data.randomVideo.videoId]);
+  const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (fetcher.data) {
@@ -58,14 +60,28 @@ const Shuffle = () => {
 
   const getNextVideo = () => {
     fetcher.submit(
-      { history: history.join("|") },
+      { history },
       { method: "POST", encType: "application/json" },
     );
   };
 
+  const handleVideoHover = () => {
+    if (!videoTitleRef.current) return;
+
+    if (hoverTimer) clearTimeout(hoverTimer);
+
+    videoTitleRef.current.style.opacity = "1";
+
+    const newTimer = setTimeout(() => {
+      if (!videoTitleRef.current) return;
+      videoTitleRef.current.style.opacity = "0";
+    }, 2000);
+
+    setHoverTimer(newTimer);
+  };
+
   return (
     <>
-      <span className="hidden">{video.title}</span>
       <video
         className="shuffle-video"
         ref={videoRef}
@@ -74,7 +90,11 @@ const Shuffle = () => {
         autoPlay
         muted
         onEnded={getNextVideo}
+        onMouseMove={handleVideoHover}
       />
+      <div ref={videoTitleRef} className="shuffle-video-title">
+        {video.title}
+      </div>
     </>
   );
 };

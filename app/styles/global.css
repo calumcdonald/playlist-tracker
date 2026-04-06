@@ -1,14 +1,19 @@
+:root {
+  --bg-colour: #301934;
+  --text-colour: #64a25d;
+}
+
 body {
   margin: 0;
   padding: 0;
-  background-color: #301934;
-  color: #64a25d;
+  background-color: var(--bg-colour);
+  color: var(--text-colour);
   font-family: "Roboto", sans-serif;
 }
 
 a {
   text-decoration: none;
-  color: #64a25d;
+  color: var(--text-colour);
 }
 
 .playlist-container {
@@ -33,7 +38,7 @@ a {
 }
 
 .video-title {
-  color: #64a25d;
+  color: var(--text-colour);
   font-size: 12px;
   vertical-align: bottom;
 }
@@ -78,6 +83,23 @@ a {
   object-fit: cover;
   background-color: black;
   overflow: hidden;
+  position: relative;
+}
+
+.shuffle-video-title {
+  z-index: 1;
+  position: absolute;
+  opacity: 0;
+  transition: opacity 0.5s;
+  top: 10px;
+  left: 10px;
+  background-color: var(--bg-colour);
+  color: var(--text-colour);
+  padding: 5px;
+}
+
+.shuffle-video:hover + .shuffle-video-title {
+  opacity: 1;
 }
 
 /* utility */
