@@ -1,6 +1,7 @@
 import { ActionFunction } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
+import { prisma } from "~/utils/db.server";
 import getRandomVideo from "~/utils/getRandomVideo.server";
 
 export async function loader() {
@@ -13,16 +14,13 @@ export async function loader() {
 
 export const action: ActionFunction = async ({ request }) => {
   const { history } = await request.json();
-  let randomVideo = await getRandomVideo();
+  const randomVideo = await getRandomVideo({ notIds: history });
 
-  let attempts = 0;
-  while (attempts < 100 && history.includes(randomVideo.videoId)) {
-    randomVideo = await getRandomVideo();
-    attempts++;
-  }
+  const count = await prisma.video.count();
 
   return {
     randomVideo,
+    clearHistory: history.lenth >= count,
   };
 };
 
@@ -41,7 +39,9 @@ const Shuffle = () => {
     if (fetcher.data) {
       const newVideo = fetcher.data.randomVideo;
       setVideo(newVideo);
-      setHistory((prev) => [...prev, newVideo.videoId]);
+      setHistory((prev) =>
+        fetcher.data.clearHistory ? [] : [...prev, newVideo.videoId],
+      );
     }
   }, [fetcher.data]);
 
